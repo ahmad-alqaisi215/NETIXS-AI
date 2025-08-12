@@ -21,7 +21,7 @@ def create_ui():
             )
             with gr.Column():
                 model_dd = gr.Dropdown(
-                    choices=["tiny", "base", "small", "medium"],
+                    choices=["tiny", "base", "small", "medium", "large"],
                     value="small",
                     label="Model size"
                 )
