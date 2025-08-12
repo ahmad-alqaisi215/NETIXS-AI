@@ -32,7 +32,7 @@ logs/                          # Auto-generated logs (created at runtime)
 
 1) Clone and enter the project:
 ```bash
-git clone <your-repo-url> && cd <repo-folder>
+git clone https://github.com/ahmad-alqaisi215/NETIXS-AI && cd NETIXS-AI
 ```
 
 2) Install dependencies:
