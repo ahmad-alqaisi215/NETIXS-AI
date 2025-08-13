@@ -1,12 +1,32 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import DevicePicker from '../components/DevicePicker.jsx'
 import MicTile from '../components/MicTile.jsx'
 import RankedTranscripts from '../components/RankedTranscripts.jsx'
 import { useAudioDevices } from '../hooks/useAudioDevices.js'
+import { createWs } from '../api/wsClient.js'
+import { useSpeakersStore } from '../store/speakersStore.js'
 
 export default function Home() {
   const { devices } = useAudioDevices()
   const [opened, setOpened] = useState([])
+  const [ws, setWs] = useState(null)
+  const setTranscript = useSpeakersStore(s => s.setTranscript)
+
+  useEffect(() => {
+    if (!opened.length) return
+    const socket = createWs({ deviceIdList: opened })
+    setWs(socket)
+    socket.onmessage = (evt) => {
+      try {
+        const msg = JSON.parse(evt.data)
+        if (msg?.type === 'transcript') {
+          // { type:'transcript', deviceId, text }
+          setTranscript(msg.deviceId, msg.text)
+        }
+      } catch {}
+    }
+    return () => socket.close()
+  }, [opened, setTranscript])
 
   const picked = useMemo(() => {
     const map = new Map(opened.map(id => [id, devices.find(d => d.deviceId === id)]))
@@ -22,7 +42,7 @@ export default function Home() {
         <>
           <div className="grid">
             {picked.map(p => (
-              <MicTile key={p.id} deviceId={p.id} label={p.label} />
+              <MicTile key={p.id} deviceId={p.id} label={p.label} ws={ws} />
             ))}
           </div>
           <RankedTranscripts />
